@@ -7,20 +7,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import techorda.bitlab.kz.db.Blog;
 import techorda.bitlab.kz.db.Category;
+import techorda.bitlab.kz.db.Comment;
 import techorda.bitlab.kz.db.DBConnection;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-@WebServlet(value = "/home")
-public class HomeServlet extends HttpServlet {
+@WebServlet(value = "/readblog")
+
+public class BlogDetailsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Blog blog = DBConnection.getBlog(id);
+        request.setAttribute("blog", blog);
         ArrayList<Category> categories = DBConnection.getCategories();
-        ArrayList<Blog> blogs = DBConnection.getAllBlogs();
-        request.setAttribute("blogs", blogs);
         request.setAttribute("categories", categories);
-        request.getRequestDispatcher("/index.jsp").forward(request,response);
-
+        if(blog != null){
+            ArrayList<Comment> comments = DBConnection.getAllComments(blog.getId());
+            request.setAttribute("comments", comments);
+        }
+        request.getRequestDispatcher("blogdetails.jsp").forward(request, response);
     }
 }

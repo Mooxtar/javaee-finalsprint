@@ -1,5 +1,6 @@
 package techorda.bitlab.kz.servlets;
 
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,25 +11,31 @@ import techorda.bitlab.kz.db.User;
 
 import java.io.IOException;
 
-@WebServlet(value = "/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet(value = "/register")
+public class AddUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        request.getRequestDispatcher("register.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String redirect = "/login?emailerror";
+        String redirect = "/register?emailerror";
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        User user = DBConnection.getUser(email);
-        System.out.println(user);
-        if(user != null){
-            redirect = "/login?passworderror";
-            if(user.getPassword().equals(password)){
-                redirect = "/profile";
-                request.getSession().setAttribute("currentUser", user);
+        String rePassword = request.getParameter("re_password");
+        String fullName = request.getParameter("full_name");
+        User checkUser = DBConnection.getUser(email);
+        if(checkUser == null){
+            redirect = "/register?passworderror";
+            if(password.equals(rePassword)){
+                User user = new User();
+                user.setEmail(email);
+                user.setPassword(password);
+                user.setFullName(fullName);
+                if(DBConnection.addUser(user)){
+                    redirect = "/register?success";
+                }
             }
         }
         response.sendRedirect(redirect);
